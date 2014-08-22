@@ -15,11 +15,12 @@
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?region=NO&v=3.exp&key=AIzaSyA-AMTBmf7l3Uq-2PEBg2HA7alXJU87beo"></script>
     <script src="rhill-voronoi-core.js"></script>
+    <script src="utm.js"></script>
     <script>
 
 
         function clip (subjectPolygon, clipPolygon) {
-            
+
             var cp1, cp2, s, e;
             var inside = function (p) {
                 return (cp2[0]-cp1[0])*(p[1]-cp1[1]) > (cp2[1]-cp1[1])*(p[0]-cp1[0]);
@@ -29,7 +30,7 @@
                 var dc = [ cp1[0] - cp2[0], cp1[1] - cp2[1] ],
                     dp = [ s[0] - e[0], s[1] - e[1] ],
                     n1 = cp1[0] * cp2[1] - cp1[1] * cp2[0],
-                    n2 = s[0] * e[1] - s[1] * e[0], 
+                    n2 = s[0] * e[1] - s[1] * e[0],
                     n3 = 1.0 / (dc[0] * dp[1] - dc[1] * dp[0]);
                 return [(n1*dp[0] - n2*dc[0]) * n3, (n1*dp[1] - n2*dc[1]) * n3];
             };
@@ -65,8 +66,16 @@
 var map;
 var geocoder = new google.maps.Geocoder();
 
-var bounds = {xl: -100.97366779999999, yt: 0.611593299999981,
-	xr: +100.83415979999999, yb: 21.14011359999995};
+var b1 = [0,0];
+var b2 = [0,0];
+
+LatLonToUTMXY(DegToRad(60.1),DegToRad(10.1),32,b1);
+LatLonToUTMXY(DegToRad(59.5),DegToRad(11.5),32,b2);
+
+//var bounds = {xl: b1[0], yt: b1[1],
+	//xr: b2[0], yb: b2[1]};
+var bounds = {xl: 0, yb: (b1[1]-b2[1])/1000,
+	xr: (b2[0]-b1[0])/1000, yt: 0};
 
 var osloborder = [
  { k: 59.91076081616976, B: 10.64249038696289 },
@@ -256,6 +265,8 @@ colormap = [ "#8e0152",
 "#4d9221",
 "#276419",
 ];
+
+//colormap = ["#0000FF","#1B00E4","#4100BE","#62009D","#7D0082","#980067","#B3004C","#D4002B","#E90016","#FF0000"];
 
 
 /*
@@ -455,8 +466,13 @@ var styles = [
 					//infowindow.open(map,marker);
 				//}.bind(this,infowindow,marker));
 
-				locs.push({x:-skoledata[i].loc.lat, y:skoledata[i].loc.lng,data:skoledata[i]});
-					
+		  		var utmoutput = [0,0];
+				LatLonToUTMXY(DegToRad(skoledata[i].loc.lat), DegToRad(skoledata[i].loc.lng), 32, utmoutput);
+				console.log(skoledata[i].name);
+				var diagramdata = {x:(utmoutput[0]-b1[0])/1000, y:(utmoutput[1]-b2[1])/1000,data:skoledata[i]};
+				console.log(diagramdata);
+				locs.push(diagramdata);
+
 
 			  }
 
@@ -471,15 +487,22 @@ var styles = [
 					  var pts2 = [];
 					  for(var k = 0; k < cell1.halfedges.length; k++) {
 						var p = cell1.halfedges[k].getStartpoint();
-						  pts.push( [-p.x, p.y]);
+						var latlon = [0,0];
+						UTMXYToLatLon(1000*p.x+b1[0],1000*p.y+b2[1],32,false,latlon);
+						//latlon[0] -= b1[0];
+						//latlon[1] -= b2[1];
+						
+						console.log("LATLON");
+						console.log(latlon);
+						pts.push( [RadToDeg(latlon[0]), RadToDeg(latlon[1])]);
 					  }
 
 					  //pts.reverse();
 
-					  console.log(pts);
-					  console.log(osloborderclip);
+					  //console.log(pts);
+					  //console.log(osloborderclip);
 					  var clippedPolygon = clip(osloborderclip,pts);
-					  console.log(clippedPolygon);
+					  //console.log(clippedPolygon);
 
 					  for(var k = 0; k < clippedPolygon.length; k++) {
 						  pts2.push( new google.maps.LatLng(clippedPolygon[k][0],clippedPolygon[k][1]));
@@ -489,12 +512,14 @@ var styles = [
 					  var andel = cell1.site.data.andel;
 					  var colorn = Math.floor(andel/100.0*colormap.length);
 					  var color = colormap[colorn];
+					  /*
 					  console.log("COLOR");
 					  console.log(i);
 					  console.log();
 					  console.log(andel);
 					  console.log(colorn);
 					  console.log(color);
+					  */
 
 					cell1.site.data.name;
 					cell1.site.data.andel;
@@ -506,7 +531,7 @@ var styles = [
 							    strokeOpacity: 0.2,
 							    strokeWeight: 0.5,
 							    fillColor: color,
-							    fillOpacity: 0.6
+							    fillOpacity: 0.5,
 							  });
 
 					  cell.setMap(map);
