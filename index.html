@@ -20,7 +20,6 @@
     <script>
 
 var map;
-var geocoder = new google.maps.Geocoder();
 
 var locs = [];
 var voronoi = new Voronoi();
@@ -49,8 +48,8 @@ function initialize() {
     for(var i = 0; i < clen; i++) {
         colorlegendstring += "<div style='display:inline; margin-left: 1em; "+
             "margin-right: 0.5em; padding-left: 1em; background-color: "+
-            colormap[i] + "'></div> " + 100.0*i/clen + "% - "
-            + 100.0*(i+1)/clen + "%<br />";
+            colormap[i] + "'></div> " + 100.0*i/clen + "% - " + 
+            100.0*(i+1)/clen + "%<br />";
     }
     colorlegend.innerHTML = colorlegendstring;
 
@@ -106,9 +105,6 @@ function initialize() {
         var andel = cell1.site.data.andel;
         var colorn = Math.floor(andel/100.0*colormap.length);
         var color = colormap[colorn];
-
-        cell1.site.data.name;
-        cell1.site.data.andel;
 
 
         var cell = new google.maps.Polygon({
