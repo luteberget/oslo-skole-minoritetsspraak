@@ -25,6 +25,9 @@ var locs = [];
 var voronoi = new Voronoi();
 var diagram;
 var infowindow = new google.maps.InfoWindow();
+var infowindowdiv = document.createElement("div");
+infowindowdiv.innerHTML = "";
+infowindowdiv.style.paddingBottom = "2em";
 var borderpoly;
 
 var boundary1 = [0,0];
@@ -119,10 +122,9 @@ function initialize() {
         cell.setMap(map);
 
         google.maps.event.addListener(cell,'click', function(data,event) {
-            infowindow.setContent(
-                "<p><b>"+data.name+"</b></p>Andel elever med annet morsmål enn norsk og samisk: "+
-                data.andel+"%<br/><p> </p><p> </p>"
-            );
+            infowindowdiv.innerHTML = "<p><b>"+data.name+"</b></p>Andel elever med annet morsmål enn norsk og samisk: "+
+                data.andel+"%<br/>";
+            infowindow.setContent(infowindowdiv);
 
             infowindow.setPosition(data.loc);
             infowindow.open(map);
