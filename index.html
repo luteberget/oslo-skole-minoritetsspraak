@@ -121,7 +121,7 @@ function initialize() {
         google.maps.event.addListener(cell,'click', function(data,event) {
             infowindow.setContent(
                 "<p><b>"+data.name+"</b></p>Andel elever med annet morsmål enn norsk og samisk: "+
-                data.andel+"%<br/><p> </p>"
+                data.andel+"%<br/><p> </p><p> </p>"
             );
 
             infowindow.setPosition(data.loc);
